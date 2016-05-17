@@ -1,0 +1,14 @@
+http:
+    image: nginx:1.10
+
+database:
+    image: postgres:2.4
+
+application:
+    build: .
+
+celerybeat:
+    build: .
+
+celeryworker:
+    build: .
