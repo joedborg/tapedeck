@@ -1,0 +1,14 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TapeDeck</title>
+    <link rel="stylesheet" href="{% static "styles/bootstrap.css" %}" />
+    <link rel="stylesheet" href="{% static "styles/font-awesome.css" %}" />
+    <link rel="stylesheet" href="{% static "styles/durandal.css" %}" />
+  </head>
+  <body>
+    <div id="applicationHost"></div>
+    <script src="{% static "libraries/require/require.js" %}" data-main="static/app/main"></script>
+  </body>
+</html>
