@@ -12,6 +12,7 @@ frontend/.eslintcache
 
 # Runtime
 .env
+wg0.conf
 downloads/
 *.db
 *.db-wal

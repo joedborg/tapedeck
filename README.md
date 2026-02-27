@@ -30,7 +30,7 @@ git clone https://github.com/you/tapedeck && cd tapedeck
 
 # 2. Configure
 cp .env.example .env
-#   → Edit .env: set TAPEDECK_SECRET, ADMIN_PASSWORD, DOWNLOAD_DIR
+#   → Edit .env: set SECRET, ADMIN_PASSWORD, DOWNLOAD_DIR
 
 # 3. Run
 docker compose up -d
@@ -44,13 +44,46 @@ Log in with the `ADMIN_USERNAME` / `ADMIN_PASSWORD` you set in `.env`
 
 ---
 
+## Optional: WireGuard deployment
+
+`WG.Dockerfile` is a variant that bakes a WireGuard VPN tunnel into the container, starting it before the tapedeck app. This is useful if you want all `get_iplayer` traffic to egress through a VPN without configuring the host network.
+
+### Prerequisites
+
+- A WireGuard configuration file named `wg0.conf` somewhere on the host — it is mounted into the container at runtime, so private keys never appear in an image layer.
+- The container must be granted the `NET_ADMIN` capability (and optionally `SYS_MODULE` if the `wireguard` kernel module is not already loaded on the host).
+
+### Compose setup
+
+These are the changes needed to make the `docker-compose` setup with Wireguard.
+
+```yaml
+services:
+  tapedeck:
+    build:
+      dockerfile: WG.Dockerfile
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    volumes:
+      - ./wg0.conf:/etc/wireguard/wg0.conf:ro
+```
+
+### How it works
+
+On startup the container (running as root) mounts and reads `/etc/wireguard/wg0.conf`, calls `wg-quick up wg0` to bring up the WireGuard interface, then drops to the unprivileged `tapedeck` user to run the application. Because the config is mounted at runtime rather than copied into the image, private keys never appear in any image layer and it is safe to push the image to a registry.
+
+---
+
 ## Configuration
 
 All settings come from environment variables (or a `.env` file — copy `.env.example` to get started):
 
 | Variable               | Default                      | Description                                                                                      |
 | ---------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
-| `TAPEDECK_SECRET`      | _(required in prod)_         | HMAC signing secret — generate with `openssl rand -hex 32`                                       |
+| `SECRET`               | _(required in prod)_         | HMAC signing secret — generate with `openssl rand -hex 32`                                       |
 | `ADMIN_USERNAME`       | `admin`                      | Initial admin username, seeded on first boot                                                     |
 | `ADMIN_PASSWORD`       | `changeme`                   | Initial admin password, seeded on first boot                                                     |
 | `DOWNLOAD_DIR`         | `./downloads`                | Host directory where downloaded programmes are stored (mounted as `/downloads` in the container) |
