@@ -3,8 +3,8 @@
 A self-hosted BBC iPlayer & BBC Sounds download manager.
 **Rust/Axum** backend · **Ember.js** web UI · **SQLite** persistence · **Docker** deployment.
 
-[!WARNING]
-A UK TV licence is required to access BBC iPlayer TV content legally.
+> [!WARNING]
+> A UK TV licence is required to access BBC iPlayer TV content legally.
 
 ---
 
@@ -91,7 +91,7 @@ cargo run
 # WS  at ws://localhost:3000/ws?token=<token>
 ```
 
-Requires `get_iplayer` (v3.36+) and `ffmpeg` to be on `PATH`.
+Requires `get_iplayer` (v3.36+) and `ffmpeg` to be in `PATH`.
 
 ### Frontend (Ember)
 
