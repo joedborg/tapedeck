@@ -1,0 +1,104 @@
+<div class="page">
+
+  {{! ── Nav ────────────────────────────────────────────────────────────────── }}
+  <nav class="navbar">
+    <span class="brand">📼 Tapedeck</span>
+    <div class="nav-links">
+      <LinkTo @route="queue" class="nav-link">Queue</LinkTo>
+      <LinkTo @route="search" class="nav-link">Search</LinkTo>
+      <LinkTo @route="settings" class="nav-link active">Settings</LinkTo>
+    </div>
+    <div class="nav-end">
+      <span class="nav-user">{{this.api.currentUser.username}}</span>
+      <button class="btn btn-ghost btn-sm" {{on "click" this.logout}}>Sign out</button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <h2 class="page-title">Settings</h2>
+
+    {{#if this.error}}
+      <div class="alert alert-error">{{this.error}}</div>
+    {{/if}}
+    {{#if this.saved}}
+      <div class="alert alert-success">Settings saved.</div>
+    {{/if}}
+
+    <form class="settings-form" {{on "submit" this.save}}>
+
+      <section class="settings-section">
+        <h3>Downloads</h3>
+
+        <div class="field">
+          <label>Output Directory</label>
+          <input type="text" value={{get this.map "output_dir"}}
+            {{on "input" (fn this.updateField "output_dir")}} />
+          <p class="field-hint">Where downloaded files will be saved.</p>
+        </div>
+
+        <div class="field">
+          <label>Max Concurrent Downloads</label>
+          <input type="number" min="1" max="10" value={{get this.map "max_concurrent"}}
+            {{on "input" (fn this.updateField "max_concurrent")}} />
+        </div>
+
+        <div class="field">
+          <label>Max Download Retries</label>
+          <input type="number" min="0" max="10" value={{get this.map "max_download_retries"}}
+            {{on "input" (fn this.updateField "max_download_retries")}} />
+          <p class="field-hint">Times to retry a failed download. Each retry backs off exponentially (2s, 4s, 8s…).</p>
+        </div>
+
+        <div class="field">
+          <label>Default Quality</label>
+          <select value={{get this.map "default_quality"}}
+            {{on "change" (fn this.updateField "default_quality")}}>
+            <option value="best">Best</option>
+            <option value="good">Good</option>
+            <option value="worst">Worst (smallest)</option>
+          </select>
+        </div>
+
+        <div class="field field-checkbox">
+          <label>
+            <input type="checkbox"
+              checked={{eq (get this.map "subtitles") "true"}}
+              {{on "change" (fn this.updateField "subtitles")}} />
+            Download subtitles
+          </label>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Tools</h3>
+
+        <div class="field">
+          <label>get_iplayer path</label>
+          <input type="text" value={{get this.map "get_iplayer_path"}}
+            {{on "input" (fn this.updateField "get_iplayer_path")}} />
+        </div>
+
+        <div class="field">
+          <label>ffmpeg path</label>
+          <input type="text" value={{get this.map "ffmpeg_path"}}
+            {{on "input" (fn this.updateField "ffmpeg_path")}} />
+        </div>
+
+        <div class="field">
+          <label>HTTP Proxy</label>
+          <input type="text" placeholder="e.g. http://proxy.example.com:8080"
+            value={{get this.map "proxy"}}
+            {{on "input" (fn this.updateField "proxy")}} />
+          <p class="field-hint">Leave blank for no proxy.</p>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" disabled={{this.saving}}>
+          {{if this.saving "Saving…" "Save Settings"}}
+        </button>
+      </div>
+
+    </form>
+  </main>
+</div>

@@ -1,0 +1,189 @@
+<div class="page">
+
+  {{! ── Nav ────────────────────────────────────────────────────────────────── }}
+  <nav class="navbar">
+    <span class="brand">📼 Tapedeck</span>
+    <div class="nav-links">
+      <LinkTo @route="queue" class="nav-link">Queue</LinkTo>
+      <LinkTo @route="search" class="nav-link active">Search</LinkTo>
+      <LinkTo @route="settings" class="nav-link">Settings</LinkTo>
+    </div>
+    <div class="nav-end">
+      <span class="nav-user">{{this.api.currentUser.username}}</span>
+      <button class="btn btn-ghost btn-sm" {{on "click" this.logout}}>Sign out</button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+
+    {{! ── Search form ─────────────────────────────────────────────────────── }}
+    <div class="search-header">
+      <form class="search-form" {{on "submit" this.search}}>
+        <div class="search-type-tabs">
+          <button
+            type="button"
+            class="filter-tab {{if (eq this.type "tv") "active"}}"
+            {{on "click" (fn this.setType "tv")}}
+          >TV</button>
+          <button
+            type="button"
+            class="filter-tab {{if (eq this.type "radio") "active"}}"
+            {{on "click" (fn this.setType "radio")}}
+          >Radio</button>
+        </div>
+
+        <input
+          class="search-input"
+          type="search"
+          placeholder="Search programmes or paste a BBC iPlayer / Sounds URL…"
+          value={{this.query}}
+          {{on "input" this.updateQuery}}
+          required
+        />
+        <button class="btn btn-primary" type="submit" disabled={{this.loading}}>
+          {{if this.loading "Searching…" "Search"}}
+        </button>
+      </form>
+    </div>
+
+    {{#if this.error}}
+      <div class="alert alert-error">{{this.error}}</div>
+    {{/if}}
+
+    {{#if this.successMessage}}
+      <div class="alert alert-success">{{this.successMessage}}</div>
+    {{/if}}
+
+    {{! ── Results ──────────────────────────────────────────────────────────── }}
+    {{#if this.loading}}
+      <div class="loading-spinner">Searching…</div>
+    {{else if this.results.length}}
+      <div class="results-grid">
+        {{#each this.results as |result|}}
+          <div class="result-card">
+            {{#if result.thumbnail_url}}
+              <img class="result-thumb" src={{result.thumbnail_url}} alt={{result.title}} loading="lazy" />
+            {{else}}
+              <div class="result-thumb thumb-placeholder">{{if (eq this.type "radio") "📻" "📺"}}</div>
+            {{/if}}
+
+            <div class="result-body">
+              <div class="result-title">{{result.title}}</div>
+              {{#if result.episode}}
+                <div class="result-meta">{{result.episode}}</div>
+              {{/if}}
+              {{#if result.series}}
+                <div class="result-meta">{{result.series}}</div>
+              {{/if}}
+              {{#if result.channel}}
+                <div class="result-meta">{{result.channel}}</div>
+              {{/if}}
+              {{#if result.description}}
+                <div class="result-desc">{{result.description}}</div>
+              {{/if}}
+              {{#if result.duration}}
+                <div class="result-meta duration">⏱ {{result.duration}}</div>
+              {{/if}}
+            </div>
+
+            <div class="result-actions">
+              {{#unless result.episode}}
+              <button
+                type="button"
+                class='btn btn-sm btn-outline {{if (eq this.selectedShow.pid result.pid) "active"}}'
+                {{on "click" (fn this.browseShow result)}}
+              >
+                {{if (eq this.selectedShow.pid result.pid) "▾ Series" "▸ Series"}}
+              </button>
+              {{/unless}}
+              <button
+                class='btn btn-sm {{if (includes this.addedPids result.pid) "btn-success" "btn-primary"}}'
+                {{on "click" (fn this.addToQueue result)}}
+                disabled={{includes this.addedPids result.pid}}
+              >
+                {{if (includes this.addedPids result.pid) "✓ Added" "+ Queue"}}
+              </button>
+            </div>
+          </div>
+          {{#if (eq this.selectedShow.pid result.pid)}}
+            <div class="episode-panel">
+              <div class="episode-panel-header">
+                <span class="episode-panel-title">{{this.selectedShow.title}}</span>
+                <button type="button" class="btn btn-ghost btn-sm" {{on "click" this.closeEpisodes}}>✕ Close</button>
+              </div>
+
+              {{#if this.episodesLoading}}
+                <div class="loading-spinner">Loading series…</div>
+              {{else if this.episodesError}}
+                <div class="alert alert-error">{{this.episodesError}}</div>
+              {{else if this.series.length}}
+                <div class="series-list">
+                  {{#each this.series as |series|}}
+                    <div class='series-row {{if (eq this.selectedSeries series.name) "active"}}'>
+                      <button
+                        type="button"
+                        class="series-toggle"
+                        {{on "click" (fn this.browseSeries series.name)}}
+                      >
+                        <span class="series-chevron">{{if (eq this.selectedSeries series.name) "▾" "▸"}}</span>
+                        <span class="series-name">{{series.name}}</span>
+                      </button>
+                      <span class="series-count muted">{{series.episodes.length}} ep{{if (gt series.episodes.length 1) "s"}}</span>
+                      <button
+                        type="button"
+                        class='btn btn-sm {{if (includes this.addedSeries series.name) "btn-success" "btn-primary"}}'
+                        {{on "click" (fn this.queueSeries series)}}
+                        disabled={{includes this.addedSeries series.name}}
+                      >{{if (includes this.addedSeries series.name) "✓ Added" "↓ Queue"}}</button>
+                    </div>
+                    {{#if (eq this.selectedSeries series.name)}}
+                      <div class="series-episodes">
+                        {{#each series.episodes as |ep|}}
+                          <div class="episode-item">
+                            <div class="episode-info">
+                              <div class="episode-title">{{or ep.episode ep.title}}</div>
+                              {{#if ep.channel}}
+                                <div class="episode-meta">{{ep.channel}}</div>
+                              {{/if}}
+                              {{#if ep.duration}}
+                                <div class="episode-meta">⏱ {{ep.duration}}</div>
+                              {{/if}}
+                              {{#if ep.description}}
+                                <div class="episode-desc">{{ep.description}}</div>
+                              {{/if}}
+                            </div>
+                            <button
+                              type="button"
+                              class='btn btn-sm {{if (includes this.addedPids ep.pid) "btn-success" "btn-primary"}}'
+                              {{on "click" (fn this.addToQueue ep)}}
+                              disabled={{includes this.addedPids ep.pid}}
+                            >
+                              {{if (includes this.addedPids ep.pid) "✓ Added" "+ Queue"}}
+                            </button>
+                          </div>
+                        {{/each}}
+                      </div>
+                    {{/if}}
+                  {{/each}}
+                </div>
+              {{else}}
+                <div class="empty-state">No episodes found — this may be a content-only or future series.</div>
+              {{/if}}
+            </div>
+          {{/if}}
+        {{/each}}
+      </div>
+
+    {{else if this.searched}}
+      <div class="empty-state">
+        <p>No results found for "{{this.query}}".</p>
+        <p>The programme cache may be out of date. Rebuild it and search again.</p>
+        <button class="btn btn-ghost" type="button" {{on "click" this.refreshCache}}
+          disabled={{this.refreshing}}>
+          {{if this.refreshing "Rebuilding…" "Rebuild Programming Cache"}}
+        </button>
+      </div>
+    {{/if}}
+
+  </main>
+</div>

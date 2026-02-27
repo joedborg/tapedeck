@@ -1,0 +1,41 @@
+services:
+  tapedeck:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tapedeck
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # Persist the SQLite database
+      - tapedeck-data:/data
+      # Persist downloaded files  — change the host path to suit your setup
+      - ${DOWNLOAD_DIR:-./downloads}:/downloads
+      # Optional: mount a custom .env file
+      # - ./.env:/app/.env:ro
+    environment:
+      - DATABASE_URL=/data/tapedeck.db
+      - OUTPUT_DIR=/downloads
+      - GET_IPLAYER_PATH=/usr/local/bin/get_iplayer
+      - FFMPEG_PATH=/usr/bin/ffmpeg
+      - STATIC_DIR=/app/ui/dist
+      - BIND=0.0.0.0:3000
+      - MAX_CONCURRENT=${MAX_CONCURRENT:-5}
+      - MAX_DOWNLOAD_RETRIES=${MAX_DOWNLOAD_RETRIES:-5}
+      # IMPORTANT: override this with a strong random secret in production
+      - SECRET=${TAPEDECK_SECRET:-change-me-in-production}
+      # Initial admin credentials — only used if no users exist
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
+      # Optional HTTP proxy for get_iplayer
+      # - PROXY=http://your-proxy:8080
+      - RUST_LOG=tapedeck=info,tower_http=info
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/settings"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+volumes:
+  tapedeck-data:

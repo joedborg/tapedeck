@@ -1,0 +1,120 @@
+<div class="page" {{did-insert this.setup}} {{will-destroy this.teardown}}>
+
+  {{! ── Nav ────────────────────────────────────────────────────────────────── }}
+  <nav class="navbar">
+    <span class="brand">📼 Tapedeck</span>
+    <div class="nav-links">
+      <LinkTo @route="queue" class="nav-link active">Queue</LinkTo>
+      <LinkTo @route="search" class="nav-link">Search</LinkTo>
+      <LinkTo @route="settings" class="nav-link">Settings</LinkTo>
+    </div>
+    <div class="nav-end">
+      <span class="nav-user">{{this.api.currentUser.username}}</span>
+      <button class="btn btn-ghost btn-sm" {{on "click" this.logout}}>Sign out</button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+
+    {{#if this.error}}
+      <div class="alert alert-error">{{this.error}}</div>
+    {{/if}}
+
+    {{! ── Filter tabs ───────────────────────────────────────────────────────── }}
+    <div class="filter-bar">
+      {{#each (array "all" "queued" "downloading" "done" "failed") as |f|}}
+        <button
+          class="filter-tab {{if (eq this.filter f) "active"}}"
+          {{on "click" (fn this.setFilter f)}}
+        >
+          {{f}}
+          <span class="badge">{{get this.statusCounts f}}</span>
+        </button>
+      {{/each}}
+
+      <div class="filter-spacer"></div>
+
+      <button class="btn btn-sm btn-ghost" {{on "click" this.refresh}}>
+        ↻ Refresh
+      </button>
+    </div>
+
+    {{! ── Queue table ────────────────────────────────────────────────────────── }}
+    {{#if this.filteredItems.length}}
+      <div class="queue-list">
+        {{#each this.filteredItems as |item|}}
+          <div class="queue-card status-{{item.status}}">
+            <div class="queue-card-thumb">
+              {{#if item.thumbnail_url}}
+                <img src={{item.thumbnail_url}} alt={{item.title}} loading="lazy" />
+              {{else}}
+                <div class="thumb-placeholder">📺</div>
+              {{/if}}
+            </div>
+
+            <div class="queue-card-body">
+              <div class="queue-card-title">{{item.title}}</div>
+              {{#if item.series}}
+                <div class="queue-card-meta">{{item.series}}</div>
+              {{/if}}
+              {{#if item.episode}}
+                <div class="queue-card-meta">{{item.episode}}</div>
+              {{/if}}
+              {{#if item.channel}}
+                <div class="queue-card-meta channel">{{item.channel}}</div>
+              {{/if}}
+
+              {{#if (eq item.status "downloading")}}
+                <div class="progress-wrap">
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill {{if (gt item.progress 0) "" "indeterminate"}}"
+                      style="width: {{item.progress}}%"
+                    ></div>
+                  </div>
+                  <div class="progress-meta">
+                    {{#if (gt item.progress 0)}}
+                      <span>{{item.progress}}%</span>
+                    {{/if}}
+                    {{#if item.speed}}<span class="speed">{{#if (gt item.progress 0)}}· {{/if}}{{item.speed}}</span>{{/if}}
+                    {{#if item.eta}}<span class="eta">{{#if (gt item.progress 0)}}ETA {{else}}elapsed {{/if}}{{item.eta}}</span>{{/if}}
+                  </div>
+                </div>
+              {{/if}}
+
+              {{#if item.error}}
+                <div class="queue-error">{{item.error}}</div>
+              {{/if}}
+
+              {{#if item.output_path}}
+                <div class="output-path">{{item.output_path}}</div>
+              {{/if}}
+            </div>
+
+            <div class="queue-card-status">
+              <span class="status-badge status-{{item.status}}">{{item.status}}</span>
+            </div>
+
+            <div class="queue-card-actions">
+              {{#if (or (eq item.status "failed") (eq item.status "cancelled"))}}
+                <button class="btn btn-sm btn-primary" {{on "click" (fn this.retry item.id)}}>
+                  Retry
+                </button>
+              {{/if}}
+              <button class="btn btn-sm btn-danger" {{on "click" (fn this.remove item.id)}}>
+                {{if (eq item.status "downloading") "Cancel" "Remove"}}
+              </button>
+            </div>
+
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="empty-state">
+        <p>No downloads {{#if (eq this.filter "all")}}yet{{else}}with status "{{this.filter}}"{{/if}}.</p>
+        <LinkTo @route="search" class="btn btn-primary">Search for programmes</LinkTo>
+      </div>
+    {{/if}}
+
+  </main>
+</div>

@@ -1,0 +1,42 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <h1 class="auth-title">
+      <span class="auth-logo">📼</span> Tapedeck
+    </h1>
+    <p class="auth-subtitle">BBC iPlayer Download Manager</p>
+
+    {{#if this.error}}
+      <div class="alert alert-error">{{this.error}}</div>
+    {{/if}}
+
+    <form {{on "submit" this.login}}>
+      <div class="field">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          value={{this.username}}
+          {{on "input" this.updateUsername}}
+          autocomplete="username"
+          required
+        />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          value={{this.password}}
+          {{on "input" this.updatePassword}}
+          autocomplete="current-password"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" disabled={{this.loading}}>
+        {{if this.loading "Signing in…" "Sign In"}}
+      </button>
+    </form>
+  </div>
+</div>

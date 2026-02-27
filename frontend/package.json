@@ -1,0 +1,50 @@
+{
+  "name": "tapedeck-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tapedeck web UI — BBC iPlayer download manager",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "build": "ember build --environment=production",
+    "build:dev": "ember build",
+    "start": "ember serve --port 4200",
+    "test": "ember test"
+  },
+  "devDependencies": {
+    "@ember/optional-features": "^2.1.0",
+    "@ember/render-modifiers": "^2.1.0",
+    "@ember/string": "^3.1.1",
+    "@ember/test-helpers": "^3.3.0",
+    "@glimmer/component": "^1.1.2",
+    "@glimmer/tracking": "^1.1.2",
+    "babel-eslint": "^10.1.0",
+    "broccoli-asset-rev": "^3.0.0",
+    "ember-auto-import": "^2.7.4",
+    "ember-cli": "~5.12.0",
+    "ember-cli-babel": "^8.2.0",
+    "ember-cli-clean-css": "^3.0.0",
+    "ember-cli-htmlbars": "^6.3.0",
+    "ember-cli-inject-live-reload": "^2.1.0",
+    "ember-cli-terser": "^4.0.2",
+    "ember-data": "~5.3.0",
+    "ember-fetch": "^8.1.2",
+    "ember-load-initializers": "^2.1.2",
+    "ember-qunit": "^8.1.0",
+    "ember-resolver": "^13.0.1",
+    "ember-source": "~5.12.0",
+    "ember-template-lint": "^6.0.0",
+    "ember-truth-helpers": "^4.0.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-ember": "^12.2.1",
+    "loader.js": "^4.7.0",
+    "qunit": "^2.22.0",
+    "qunit-dom": "^3.2.1",
+    "webpack": "^5.97.0"
+  },
+  "engines": {
+    "node": ">= 18"
+  },
+  "ember": {
+    "edition": "octane"
+  }
+}

@@ -1,0 +1,22 @@
+# Rust
+backend/target/
+backend/Cargo.lock
+
+# Ember
+frontend/node_modules/
+frontend/dist/
+frontend/.ember-cli
+frontend/tmp/
+frontend/.DS_Store
+frontend/.eslintcache
+
+# Runtime
+.env
+downloads/
+*.db
+*.db-wal
+*.db-shm
+
+# OS
+.DS_Store
+Thumbs.db
